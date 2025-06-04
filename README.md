@@ -2,17 +2,17 @@
 
 *COMPANY*: CODTECH IT SOLUTIONS
 
-NAME: SOHINI MONDAL
+*NAME*: SOHINI MONDAL
 
-INTERN ID: CT04DM429
+*INTERN ID*: CT04DM429
 
-DOMAIN: C++ PROGRAMMING
+*DOMAIN*: C++ PROGRAMMING
 
-DURATION: 4 WEEKS
+*DURATION*: 4 WEEKS
 
-MENTOR: NELLA SANTOSH KUMAR
+*MENTOR*: NELLA SANTOSH KUMAR
 
-DESCRIPTION:This C++ program implements a simple arithmetic expression evaluator using a recursive descent parser approach. The evaluator takes a string input from the user, representing a mathematical expression, and computes its result while respecting operator precedence and handling nested expressions using parentheses. The parsing and evaluation logic is encapsulated in a class named Parser, which performs the recursive analysis of the expression.
+*DESCRIPTION*:This C++ program implements a simple arithmetic expression evaluator using a recursive descent parser approach. The evaluator takes a string input from the user, representing a mathematical expression, and computes its result while respecting operator precedence and handling nested expressions using parentheses. The parsing and evaluation logic is encapsulated in a class named Parser, which performs the recursive analysis of the expression.
 
 The Parser class has two key private members: a std::string input, which stores the user-provided expression, and a size_t pos, which tracks the current position of parsing within the string. The constructor initializes these members by assigning the input string and setting the initial position to zero.
 
