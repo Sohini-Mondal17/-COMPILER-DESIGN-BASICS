@@ -28,3 +28,4 @@ In conclusion, the program supports basic arithmetic operations: addition, subtr
 
 OUTPUT:
 
+![Image](https://github.com/user-attachments/assets/85d4cfdc-6ebf-4867-bae6-908769d71aaa)
