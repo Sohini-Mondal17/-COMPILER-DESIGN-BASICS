@@ -1,31 +1,201 @@
-# MULTITHREADED-FILE-COMPRESSION-TOOL
+#include <iostream>
+#include <string>
+#include <cctype>
+#include <stdexcept>
 
-*COMPANY*: CODTECH IT SOLUTIONS
+class Parser {
+    std::string input;
+    size_t pos;
 
-*NAME*: SOHINI MONDAL
+public:
+    Parser(const std::string& str) : input(str), pos(0) {}
 
-*INTERN ID*: CT04DM429
+    double parse() {
+        double result = expression();
+        if (pos < input.length()) {
+            throw std::runtime_error("Unexpected characters at end");
+        }
+        return result;
+    }
 
-*DOMAIN*: C++ PROGRAMMING
+private:
+    char peek() {
+        while (pos < input.length() && isspace(input[pos])) pos++;
+        return pos < input.length() ? input[pos] : '\0';
+    }
 
-*DURATION*: 4 WEEKS
+    char get() {
+        char c = peek();
+        if (c != '\0') pos++;
+        return c;
+    }
 
-*MENTOR*: NELLA SANTOSH KUMAR
+    double number() {
+        std::string num;
+        while (isdigit(peek()) || peek() == '.') {
+            num += get();
+        }
+        return std::stod(num);
+    }
 
-*DESCRIPTION*:This C++ program implements a simple arithmetic expression evaluator using a recursive descent parser approach. The evaluator takes a string input from the user, representing a mathematical expression, and computes its result while respecting operator precedence and handling nested expressions using parentheses. The parsing and evaluation logic is encapsulated in a class named Parser, which performs the recursive analysis of the expression.
+    double factor() {
+        char c = peek();
+        if (c == '(') {
+            get(); // skip '('
+            double result = expression();
+            if (get() != ')') {
+                throw std::runtime_error("Missing closing parenthesis");
+            }
+            return result;
+        } else if (isdigit(c) || c == '.') {
+            return number();
+        } else {
+            throw std::runtime_error("Unexpected character in factor");
+        }
+    }
 
-The Parser class has two key private members: a std::string input, which stores the user-provided expression, and a size_t pos, which tracks the current position of parsing within the string. The constructor initializes these members by assigning the input string and setting the initial position to zero.
+    double term() {
+        double result = factor();
+        while (true) {
+            char op = peek();
+            if (op == '*' || op == '/') {
+                get(); // consume operator
+                double right = factor();
+                if (op == '*') result *= right;
+                else if (op == '/') result /= right;
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
 
-The main public method in the class is parse(). It initiates the parsing process by calling the expression() function, which begins evaluating the expression from left to right while honoring operator precedence. After evaluation, parse() checks if any characters are left unprocessed. If there are, it throws a std::runtime_error indicating that unexpected characters were found, signaling a malformed expression.
+    double expression() {
+        double result = term();
+        while (true) {
+            char op = peek();
+            if (op == '+' || op == '-') {
+                get(); // consume operator
+                double right = term();
+                if (op == '+') result += right;
+                else if (op == '-') result -= right;
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+};
 
-To support parsing, several helper functions are defined. The peek() method skips over any whitespace and returns the current character without advancing the position. This allows the parser to ignore spaces and focus only on meaningful symbols. The get() function retrieves the current character by calling peek() and moves the parsing position forward. The number() function is used to extract numeric values from the input. It collects digits and optional decimal points into a string and then converts this string to a floating-point number using the std::stod function.
+int main() {
+    std::string line;
+    std::cout << "Enter an arithmetic expression: ";
+    std::getline(std::cin, line);
 
-The core parsing logic is implemented through three functions: factor(), term(), and expression(), each representing a level of operator precedence. The factor() function handles the most basic elements, such as numbers and expressions enclosed in parentheses. If an opening parenthesis is encountered, it recursively evaluates the subexpression and expects a matching closing parenthesis. The term() function processes multiplication and division. It starts with a factor and continues evaluating additional factors as long as * or / operators are found. The expression() function manages addition and subtraction, calling term() and applying + or - operators as needed.
+    try {
+        Parser parser(line);
+        double result = parser.parse();
+        std::cout << "Result: " << result << std::endl;
+    } catch (std::exception& ex) {
+        std::cout << "Error: " << ex.what() << std::endl;
+    }
 
-The main() function prompts the user to input an arithmetic expression. It reads the full line using std::getline() and passes it to a Parser object. It then calls parse() to evaluate the expression. If parsing or evaluation fails due to syntax errors—such as missing parentheses or invalid characters—a runtime exception is caught and the error message is displayed.
+    return 0;
+}
+    for (int i = 0; i < threadCount; ++i) {
+        threads.emplace_back(worker, i);
+    }
+    
+    // Wait for completion
+    for (auto &t : threads) {
+        t.join();
+    }
+    
+    // Write results
+    for (auto &result : results) {
+        outFile << result;
+    }
+    
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    
+    std::cout << (compress ? "Compression" : "Decompression") 
+              << " with " << threadCount << " threads took: " 
+              << duration.count() << " ms\n";
+}
 
-In conclusion, the program supports basic arithmetic operations: addition, subtraction, multiplication, division, floating-point numbers, and parentheses for grouping. Whitespace is ignored, making it tolerant to various input styles. This program is a clear demonstration of recursive descent parsing and provides a practical example of building a calculator-like parser in C++.
+// Single-threaded version for comparison
+void processFileSingleThread(const std::string &inputPath,
+                           const std::string &outputPath,
+                           bool compress) {
+    std::ifstream inFile(inputPath, std::ios::binary);
+    if (!inFile) throw std::runtime_error("Cannot open input file");
+    
+    std::string input((std::istreambuf_iterator<char>(inFile)), 
+                     std::istreambuf_iterator<char>());
+    
+    std::ofstream outFile(outputPath, std::ios::binary);
+    if (!outFile) throw std::runtime_error("Cannot open output file");
+    
+    auto startTime = std::chrono::high_resolution_clock::now();
+    std::string result = compress ? rleCompress(input) : rleDecompress(input);
+    auto endTime = std::chrono::high_resolution_clock::now();
+    
+    outFile << result;
+    
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    std::cout << (compress ? "Compression" : "Decompression") 
+              << " (single-threaded) took: " 
+              << duration.count() << " ms\n";
+}
 
-*OUTPUT*:
+void validateFiles(const std::string &original, const std::string &decompressed) {
+    std::ifstream origFile(original, std::ios::binary);
+    std::ifstream decFile(decompressed, std::ios::binary);
+    
+    std::string origContent((std::istreambuf_iterator<char>(origFile)), 
+                std::istreambuf_iterator<char>());
+    std::string decContent((std::istreambuf_iterator<char>(decFile)), 
+                std::istreambuf_iterator<char>());
+    
+    if (origContent == decContent) {
+        std::cout << "Validation successful: files match\n";
+    } else {
+        std::cout << "Validation failed: files differ\n";
+        std::cout << "Original size: " << origContent.size() << "\n";
+        std::cout << "Decompressed size: " << decContent.size() << "\n";
+    }
+}
 
-
+int main() {
+    try {
+        const std::string inputFile = "input.txt";
+        const std::string compressedFile = "compressed.rle";
+        const std::string decompressedFile = "decompressed.txt";
+        const int threadCount = 4; // Adjust based on your CPU cores
+        
+        // Generate test file if needed
+        {
+            std::ofstream testFile(inputFile);
+            for (int i = 0; i < 100000; i++) {
+                testFile << "This is a test line with some repeated characters aaaaaaaand some more...\n";
+            }
+        }
+        
+        std::cout << "=== Single-threaded ===\n";
+        processFileSingleThread(inputFile, compressedFile, true);
+        processFileSingleThread(compressedFile, decompressedFile, false);
+        validateFiles(inputFile, decompressedFile);
+        
+        std::cout << "\n=== Multi-threaded (" << threadCount << " threads) ===\n";
+        processFile(inputFile, compressedFile, true, threadCount);
+        processFile(compressedFile, decompressedFile, false, threadCount);
+        validateFiles(inputFile, decompressedFile);
+        
+    } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
+    
+    return 0;
+}
